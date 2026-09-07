@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#0b1f33" />
+  <title>Omnidite OS</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand"><div class="mark">O</div><div><strong>OMNIDITE</strong><span>OS · Project 001</span></div></div>
+      <nav>
+        <button class="nav active" data-view="overview">Overview</button>
+        <button class="nav" data-view="portfolio">Portfolio</button>
+        <button class="nav" data-view="roadmap">Roadmap</button>
+        <button class="nav" data-view="weekly">Weekly Focus</button>
+        <button class="nav" data-view="infrastructure">Infrastructure</button>
+      </nav>
+      <div class="sidebar-foot"><small>PROGRAM WINDOW</small><strong>Sep 7, 2026 → Mar 7, 2027</strong><span>Six-month execution cycle</span></div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div><div class="eyebrow">PORTFOLIO COMMAND CENTER</div><h1 id="title">Overview</h1></div>
+        <div class="actions">
+          <button class="btn" id="focus">Focus: P0/P1</button>
+          <button class="btn" id="export">Export JSON</button>
+          <label class="btn file">Import JSON<input type="file" id="import" accept="application/json" /></label>
+          <button class="btn primary" id="add-project">+ Project</button>
+        </div>
+      </header>
+
+      <section class="view active" id="overview">
+        <div class="hero-grid">
+          <article class="hero">
+            <div class="eyebrow">CURRENT MANDATE</div>
+            <h2>Build the operating system while executing the portfolio.</h2>
+            <p>Omnidite OS is the system of record. A milestone is only complete when its exit criterion is verifiably satisfied.</p>
+            <div class="gate" id="next-gate"></div>
+          </article>
+          <article class="panel rules">
+            <div class="eyebrow">DISCIPLINE RULES</div>
+            <ol><li>P0 before lower priority work.</li><li>No incubation project starts early without re-planning.</li><li>Every Sunday records slippage and next commitments.</li><li>At six months: Scale / Maintain / Incubate / Archive.</li></ol>
+          </article>
+        </div>
+        <div class="kpis" id="kpis"></div>
+        <div class="two-col">
+          <article class="panel"><div class="panel-head"><div><div class="eyebrow">NOW</div><h3>Upcoming hard gates</h3></div><span class="pill">priority queue</span></div><div id="upcoming"></div></article>
+          <article class="panel"><div class="panel-head"><div><div class="eyebrow">CAPACITY</div><h3>Projects by lane</h3></div></div><div id="lanes"></div></article>
+        </div>
+      </section>
+
+      <section class="view" id="portfolio">
+        <div class="toolbar"><input class="input" id="search" placeholder="Search projects, parents, outcomes…" /><select class="input" id="lane"><option value="">All lanes</option></select><select class="input" id="status"><option value="">All statuses</option><option>Active</option><option>Scheduled</option><option>Incubation</option><option>On Hold</option><option>Completed</option><option>Archived</option></select></div>
+        <div class="panel table-panel"><div class="table-wrap"><table><thead><tr><th>Project</th><th>Parent</th><th>Lane</th><th>Priority</th><th>Status</th><th>Six-month outcome</th><th>Progress</th></tr></thead><tbody id="projects"></tbody></table></div></div>
+      </section>
+
+      <section class="view" id="roadmap"><article class="panel"><div class="panel-head"><div><div class="eyebrow">MASTER ROADMAP</div><h3>Milestone Gantt</h3></div><span class="pill">Sep 2026–Mar 2027</span></div><div class="gantt-wrap" id="gantt"></div></article></section>
+
+      <section class="view" id="weekly"><article class="panel"><div class="panel-head"><div><div class="eyebrow">SUNDAY REVIEW</div><h3>Weekly accountability</h3></div><span class="pill">26-week cycle</span></div><div id="week-list"></div></article></section>
+
+      <section class="view" id="infrastructure"><article class="panel"><div class="panel-head"><div><div class="eyebrow">SYSTEM OF RECORD</div><h3>Infrastructure registry</h3></div></div><p class="muted">Track where projects live. Never store secrets, passwords, or API keys here.</p><div class="table-wrap"><table><thead><tr><th>Project</th><th>Repository</th><th>Hosting</th><th>Database</th><th>Domain</th><th>State</th></tr></thead><tbody id="infra"></tbody></table></div></article></section>
+    </main>
+  </div>
+
+  <dialog id="project-dialog"><form method="dialog" id="project-form" class="modal"><div class="panel-head"><div><div class="eyebrow">PORTFOLIO REGISTRY</div><h3>Add project</h3></div><button class="close" value="cancel">×</button></div><label>Name<input class="input" name="name" required /></label><label>Parent / Business Unit<input class="input" name="parent" required /></label><div class="form-row"><label>Lane<select class="input" name="lane"><option>Core</option><option>Industrial</option><option>Darts</option><option>Commercial</option><option>R&D</option><option>Commerce</option><option>Personal</option></select></label><label>Priority<select class="input" name="priority"><option>P0</option><option>P1</option><option>P2</option><option>P3</option></select></label></div><label>Six-month outcome<textarea class="input" name="outcome" rows="3" required></textarea></label><div class="modal-actions"><button class="btn" value="cancel">Cancel</button><button class="btn primary" id="save-project" value="default">Save</button></div></form></dialog>
+
+  <script src="seed.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
