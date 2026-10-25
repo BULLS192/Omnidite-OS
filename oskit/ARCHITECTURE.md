@@ -15,3 +15,11 @@ From repository root:
   node server.mjs
 
 All new source is copyright Omnidite Advisory; no claim of ownership over Gauzy.
+
+
+## Configuration-defined custom modules
+A profile can declare independent collections without patching the core:
+- Omnidite example: asset register.
+- TTT example: vehicle register.
+
+Each extension supplies an id, group, label, fields and optional listColumns. Currently supported field kinds: text, date, number, select. The browser UI discovers these extensions and displays CRUD tables and input forms. They receive the same workspace-scoped storage, export/import and audit behavior. Complex relational workflows, unique constraints and migrations require a real backend before production.

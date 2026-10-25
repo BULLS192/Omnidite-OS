@@ -48,3 +48,20 @@ test('bad backup leaves existing data intact',()=>{
   const os=createOS(omniditeProfile,memoryStore());os.upsert('contacts',{name:'Retained'});
   assert.throws(()=>os.importBackup('{bad json'));assert.equal(os.list('contacts').length,1);
 });
+
+test('custom profile schema works without rewriting core',()=>{
+  const omni=createOS(omniditeProfile,memoryStore());
+  assert.ok(omni.types().includes('assets'));
+  const asset=omni.upsert('assets',{name:'Sample printer',category:'Equipment',status:'Active'});
+  assert.equal(omni.list('assets')[0].id,asset.id);
+  assert.equal(omni.summary().counts.assets,1);
+  const ttt=createOS(tttExampleProfile,memoryStore());
+  assert.ok(ttt.types().includes('vehicles'));
+  assert.equal(ttt.types().includes('assets'),false);
+  ttt.upsert('vehicles',{name:'Sample van',plate:'TEST-001',status:'Available'});
+  assert.equal(ttt.list('vehicles').length,1);
+});
+test('invalid extension definition is refused',()=>{
+  const bad={...omniditeProfile,extensions:[{id:'contacts',module:'crm',label:'Bad',fields:[{key:'name',kind:'text'}]}]};
+  assert.throws(()=>createOS(bad,memoryStore()),/duplicate extension/);
+});

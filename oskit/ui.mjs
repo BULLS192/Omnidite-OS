@@ -30,9 +30,9 @@ const escape=(value)=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','
 const attr=escape;
 const currentFormat=(os,value)=>new Intl.NumberFormat(undefined,{style:'currency',currency:os.profile.currency||'USD'}).format((value||0)/100);
 function renderField(os,type,field,record) {
-  const [key,label,kind,required]=field;
+  const [key,label,kind,required,choices]=field;
   const raw=kind==='money'?(record?money(record.amountCents):'0.00'):(record?.[key]??'');
-  const options=kind==='status'?STATUSES[type]:
+  const options=kind==='select'?choices:kind==='status'?STATUSES[type]:
     kind==='priority'?['P0','P1','P2','P3']:null;
   if(options) return '<label>'+escape(label)+'<select name="'+attr(key)+'" class="input">'+options.map(x=>'<option value="'+attr(x)+'"'+(x===(raw||(kind==='priority'?'P2':options[0]))?' selected':'')+'>'+escape(x)+'</option>').join('')+'</select></label>';
   if(kind.startsWith('ref:')) {
@@ -151,6 +151,19 @@ function legacyProjects(){
   return Array.isArray(stored?.projects)?stored.projects:(window.OMNIDITE_SEED?.projects||[]);
 }
 export function mountOS(os) {
+  // Optional custom modules: vehicle jobs, equipment, assets, service tickets...
+  // Their schema and presentation derive from the profile, not a fork of the kernel.
+  for(const extension of os.profile.extensions||[]) {
+    const section=MODULES.find(x=>x.id===extension.module);
+    if(!section)continue;
+    section.types.push(extension.id);
+    TYPES[extension.id]={
+      label:extension.label,
+      fields:extension.fields.map(f=>[f.key,f.label,f.kind,!!f.required,f.options||[]])
+    };
+    COLUMN[extension.id]=extension.listColumns||extension.fields.slice(0,4).map(f=>f.key);
+    for(const f of extension.fields)LABEL[f.key]=f.label;
+  }
   const main=document.querySelector('.shell main');
   const sidebar=document.querySelector('.sidebar nav');
   if(!main||!sidebar)throw new Error('Omnidite legacy shell not found.');

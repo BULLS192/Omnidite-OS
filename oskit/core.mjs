@@ -34,45 +34,91 @@ export function memoryStore() {
   const items=new Map();
   return {getItem:k=>items.has(k)?items.get(k):null,setItem:(k,v)=>items.set(k,String(v)),removeItem:k=>items.delete(k)};
 }
+/**
+ * A profile can declare custom collections without changing OS Core.
+ * Each has a unique ID, a name field and a small declarative field schema.
+ */
+export function extensionsOf(profile) {
+  const extensions=profile.extensions||[];
+  if(!Array.isArray(extensions))throw new Error('Extensions must be an array.');
+  const used=new Set(TYPES);
+  for(const ext of extensions) {
+    if(!identifier(ext.id)||used.has(ext.id))throw new Error('Invalid or duplicate extension ID.');
+    if(!['crm','delivery','finance'].includes(ext.module)||!clean(ext.label))throw new Error('Invalid extension group or label.');
+    if(!Array.isArray(ext.fields)||!ext.fields.some(f=>f.key==='name'&&f.kind==='text'))throw new Error('Extension requires a name text field.');
+    const keys=new Set();
+    for(const f of ext.fields) {
+      if(!identifier(f.key)||keys.has(f.key)||['id','workspaceId','createdAt','updatedAt'].includes(f.key))
+        throw new Error('Invalid extension field name.');
+      if(!['text','date','number','select'].includes(f.kind))throw new Error('Unsupported extension field type.');
+      if(f.kind==='select'&&(!Array.isArray(f.options)||!f.options.length||f.options.some(v=>!clean(v))))throw new Error('Select fields need options.');
+      keys.add(f.key);
+    }
+    used.add(ext.id);
+  }
+  return extensions;
+}
 export function validateProfile(profile) {
   if (!profile||!identifier(profile.id)||!clean(profile.name)) throw new Error('Invalid profile ID/name.');
   if (!Array.isArray(profile.modules)||profile.modules.some(m=>!['crm','delivery','finance','settings'].includes(m))) throw new Error('Invalid module selection.');
+  extensionsOf(profile);
   return true;
 }
 function fresh(profile) {
   const workspaces=(profile.initialWorkspaces?.length?profile.initialWorkspaces:[{id:'primary',name:profile.name}]).map(w=>({id:clean(w.id,100),name:clean(w.name,100)}));
   if(workspaces.some(w=>!identifier(w.id)||!w.name)) throw new Error('Invalid workspace configuration.');
-  return {version:VERSION,profileId:profile.id,workspaces,activeWorkspaceId:workspaces[0].id,records:Object.fromEntries(TYPES.map(t=>[t,[]])),audit:[]};
+  return {version:VERSION,profileId:profile.id,workspaces,activeWorkspaceId:workspaces[0].id,records:Object.fromEntries([...TYPES,...extensionsOf(profile).map(x=>x.id)].map(t=>[t,[]])),audit:[]};
 }
-function validateSnapshot(s,profileId) {
+function validateSnapshot(s,profileId,allTypes) {
   if (!s||s.version!==VERSION||s.profileId!==profileId) throw new Error('Backup has a different OS profile/version.');
   if (!Array.isArray(s.workspaces)||!s.workspaces.length||s.workspaces.some(w=>!identifier(w.id)||!clean(w.name))) throw new Error('Invalid workspaces.');
   if (!s.workspaces.some(w=>w.id===s.activeWorkspaceId)) throw new Error('Invalid active workspace.');
-  if (!s.records||TYPES.some(t=>!Array.isArray(s.records[t]))||!Array.isArray(s.audit)) throw new Error('Invalid records.');
+  if (!s.records||allTypes.some(t=>!Array.isArray(s.records[t]))||!Array.isArray(s.audit)) throw new Error('Invalid records.');
   const ids=new Set(s.workspaces.map(w=>w.id));
-  for(const t of TYPES) for(const item of s.records[t]) {
-    if (!identifier(item.id)||!ids.has(item.workspaceId)||!clean(item[TITLE[t]])) throw new Error('Malformed '+t+' record.');
+  for(const t of allTypes) for(const item of s.records[t]) {
+    if (!identifier(item.id)||!ids.has(item.workspaceId)||!clean(item[TITLE[t]||'name'])) throw new Error('Malformed '+t+' record.');
     if ('amountCents' in item && (!Number.isSafeInteger(item.amountCents)||item.amountCents<0)) throw new Error('Malformed money field.');
   }
 }
 export function createOS(profile,store=globalThis.localStorage) {
   validateProfile(profile);
+  const extensions=extensionsOf(profile);
+  const allTypes=[...TYPES,...extensions.map(x=>x.id)];
   if (!store?.getItem||!store?.setItem) throw new Error('A storage adapter is required.');
   const key='oscore:'+profile.id+':v1';
   const original=store.getItem(key);
   let state=original?JSON.parse(original):fresh(profile);
-  validateSnapshot(state,profile.id);
+  validateSnapshot(state,profile.id,allTypes);
   const persist=()=>store.setItem(key,JSON.stringify(state));
   const audit=(event,type,id)=>{
     state.audit.unshift({id:uid(),event,type,entityId:id,workspaceId:state.activeWorkspaceId,at:now()});
     state.audit=state.audit.slice(0,200);
   };
   const list=(type,opts={})=>{
-    if(!TYPES.includes(type))throw new Error('Unknown entity type.');
+    if(!allTypes.includes(type))throw new Error('Unknown entity type.');
     return clone(state.records[type].filter(x=>opts.allWorkspaces||x.workspaceId===state.activeWorkspaceId));
   };
   const find=(type,id)=>list(type).find(x=>x.id===id)||null;
   const normalize=(type,raw,prev)=>{
+    const extension=extensions.find(x=>x.id===type);
+    if(extension) {
+      const item={...prev};
+      for(const field of extension.fields) {
+        const value=raw[field.key]??prev?.[field.key]??'';
+        if(field.kind==='number') {
+          item[field.key]=Number(value||0);
+          if(!Number.isFinite(item[field.key]))throw new Error('Invalid number for '+field.label);
+        } else {
+          item[field.key]=clean(value,field.kind==='text'?2000:180);
+          if(field.kind==='date'&&item[field.key]&&!/^\d{4}-\d{2}-\d{2}$/.test(item[field.key]))
+            throw new Error('Invalid date for '+field.label);
+          if(field.kind==='select'&&!field.options.includes(item[field.key]))
+            item[field.key]=field.options[0];
+        }
+        if(field.required&&!String(item[field.key]).trim())throw new Error(field.label+' is required.');
+      }
+      return item;
+    }
     const title=clean(raw[TITLE[type]],180);
     if(!title)throw new Error('Name or title is required.');
     const item={...prev,[TITLE[type]]:title,status:clean(raw.status||prev?.status||STATUSES[type][0],30),notes:clean(raw.notes??prev?.notes,4000)};
@@ -116,7 +162,7 @@ export function createOS(profile,store=globalThis.localStorage) {
     return item;
   };
   const upsert=(type,raw,id=null)=>{
-    if(!TYPES.includes(type))throw new Error('Unknown entity type.');
+    if(!allTypes.includes(type))throw new Error('Unknown entity type.');
     const prev=id?find(type,id):null;
     if(id&&!prev)throw new Error('Record not found in selected workspace.');
     const body=normalize(type,raw,prev);
@@ -146,7 +192,7 @@ export function createOS(profile,store=globalThis.localStorage) {
   };
   const summary=()=>({
     workspace:clone(state.workspaces.find(w=>w.id===state.activeWorkspaceId)),
-    counts:Object.fromEntries(TYPES.map(t=>[t,list(t).length])),
+    counts:Object.fromEntries(allTypes.map(t=>[t,list(t).length])),
     pipelineCents:list('deals').filter(x=>x.status!=='Lost').reduce((n,x)=>n+x.amountCents,0),
     outstandingCents:list('invoices').filter(x=>x.status!=='Paid').reduce((n,x)=>n+x.amountCents,0),
     expensesCents:list('expenses').reduce((n,x)=>n+x.amountCents,0),
@@ -172,13 +218,13 @@ export function createOS(profile,store=globalThis.localStorage) {
   const exportBackup=()=>JSON.stringify({application:'oscore',exportedAt:now(),...clone(state)},null,2);
   const importBackup=value=>{
     const payload=typeof value==='string'?JSON.parse(value):clone(value);
-    validateSnapshot(payload,profile.id);
-    const sanitized={version:VERSION,profileId:profile.id,workspaces:clone(payload.workspaces),activeWorkspaceId:payload.activeWorkspaceId,records:Object.fromEntries(TYPES.map(t=>[t,clone(payload.records[t])])),audit:clone(payload.audit).slice(0,200)};
+    validateSnapshot(payload,profile.id,allTypes);
+    const sanitized={version:VERSION,profileId:profile.id,workspaces:clone(payload.workspaces),activeWorkspaceId:payload.activeWorkspaceId,records:Object.fromEntries(allTypes.map(t=>[t,clone(payload.records[t])])),audit:clone(payload.audit).slice(0,200)};
     const previous=state;state=sanitized;
     try{persist();}catch(err){state=previous;throw err;}
   };
   return Object.freeze({
-    profile:clone(profile),list,find,upsert,remove,summary,projectFromWonDeal,importLegacyProjects,
+    profile:clone(profile),types:()=>[...allTypes],list,find,upsert,remove,summary,projectFromWonDeal,importLegacyProjects,
     selectWorkspace,addWorkspace,activeWorkspace:()=>clone(state.workspaces.find(w=>w.id===state.activeWorkspaceId)),
     workspaces:()=>clone(state.workspaces),activity:()=>clone(state.audit),exportBackup,importBackup
   });
