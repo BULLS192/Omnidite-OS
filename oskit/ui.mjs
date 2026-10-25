@@ -34,7 +34,7 @@ function renderField(os,type,field,record) {
   const raw=kind==='money'?(record?money(record.amountCents):'0.00'):(record?.[key]??'');
   const options=kind==='status'?STATUSES[type]:
     kind==='priority'?['P0','P1','P2','P3']:null;
-  if(options) return '<label>'+escape(label)+'<select name="'+attr(key)+'" class="input">'+options.map(x=>'<option value="'+attr(x)+'"'+(x===(raw||options[0])?' selected':'')+'>'+escape(x)+'</option>').join('')+'</select></label>';
+  if(options) return '<label>'+escape(label)+'<select name="'+attr(key)+'" class="input">'+options.map(x=>'<option value="'+attr(x)+'"'+(x===(raw||(kind==='priority'?'P2':options[0]))?' selected':'')+'>'+escape(x)+'</option>').join('')+'</select></label>';
   if(kind.startsWith('ref:')) {
     const target=kind.slice(4);
     return '<label>'+escape(label)+'<select name="'+attr(key)+'" class="input"><option value="">Unlinked</option>'+
@@ -100,6 +100,9 @@ const dialog=(os,type,id)=>{
       element.close();render(os);
     } catch(e){window.alert(e.message);}
   });
+  element.querySelectorAll('[data-os-action="close"]').forEach(button =>
+    button.addEventListener('click', () => element.close())
+  );
   element.showModal();
 };
 let titles={};
