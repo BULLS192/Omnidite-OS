@@ -19,4 +19,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test oskit/tests/*.test.mjs
+      - name: JavaScript syntax checks
+        run: |
+          node --check server.mjs
+          node --check oskit/core.mjs
+          node --check oskit/ui.mjs
+          node --check oskit/boot.mjs
+          node --check oskit/profiles/omnidite.mjs
+          node --check oskit/profiles/ttt-example.mjs
+      - name: Unit and integration checks
+        run: node --test oskit/tests/*.test.mjs
