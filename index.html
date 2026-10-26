@@ -7,6 +7,13 @@
   <title>Omnidite OS</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="oskit/ui.css" />
+  <link rel="stylesheet" href="oskit/access.css" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/svg+xml" href="assets/os-icon.svg" />
+  <meta name="application-name" content="Omnidite OS" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Omnidite OS" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
   <div class="shell">
@@ -26,6 +33,7 @@
       <header class="topbar">
         <div><div class="eyebrow">PORTFOLIO COMMAND CENTER</div><h1 id="title">Overview</h1></div>
         <div class="actions">
+          <span class="oskit-local-warning" title="Data is stored on this device; there is no cloud synchronization yet">Local device data · Not synced</span>
           <button class="btn" id="focus">Focus: P0/P1</button>
           <button class="btn" id="export">Export JSON</button>
           <label class="btn file">Import JSON<input type="file" id="import" accept="application/json" /></label>

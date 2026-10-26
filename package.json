@@ -1,0 +1,53 @@
+{
+  "name": "omnidite-os-desktop",
+  "version": "0.2.0",
+  "private": true,
+  "description": "OmniditeOS internal standalone desktop application",
+  "main": "desktop/main.cjs",
+  "author": "Omnidite Advisory",
+  "scripts": {
+    "start:desktop": "electron .",
+    "build:win": "electron-builder --win nsis portable --publish never",
+    "test": "node --test oskit/tests/*.test.mjs"
+  },
+  "devDependencies": {
+    "electron": "45.0.0",
+    "electron-builder": "26.18.0"
+  },
+  "build": {
+    "appId": "com.omnidite.os",
+    "productName": "Omnidite OS",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "desktop/main.cjs",
+      "index.html",
+      "styles.css",
+      "app.js",
+      "seed.js",
+      "oskit/*.mjs",
+      "oskit/*.css",
+      "oskit/profiles/*.mjs",
+      "manifest.webmanifest",
+      "assets/os-icon.svg",
+      "package.json"
+    ],
+    "asar": true,
+    "compression": "normal",
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "artifactName": "OmniditeOS-${version}-${arch}-${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "shortcutName": "Omnidite OS"
+    }
+  }
+}

@@ -1,0 +1,38 @@
+name: Build Omnidite OS desktop (Windows)
+on:
+  workflow_dispatch:
+  push:
+    branches: [feature/os-core-modular-v0.2]
+    paths:
+      - 'desktop/**'
+      - 'package.json'
+      - '.github/workflows/desktop-windows.yml'
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
+      - name: Install dependencies
+        run: npm ci
+      - name: Run core tests
+        run: npm test
+      - name: Build desktop app
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: npm run build:win
+      - uses: actions/upload-artifact@v4
+        with:
+          name: OmniditeOS-Windows-unsigned-v0.2
+          path: dist/*.exe
+          retention-days: 14
+          if-no-files-found: error

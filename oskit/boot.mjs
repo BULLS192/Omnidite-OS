@@ -12,3 +12,14 @@ try {
   document.querySelector('.shell main')?.prepend(notice);
   console.error('OS Core initialization failed:',error);
 }
+
+
+// Progressive Web App: installed shortcuts, mobile Home Screen and offline shell.
+// The service worker caches application assets, never user records or API data.
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  window.addEventListener('load', () =>
+    navigator.serviceWorker.register('/service-worker.js').catch(error =>
+      console.warn('Omnidite OS offline shell unavailable:', error)
+    )
+  );
+}

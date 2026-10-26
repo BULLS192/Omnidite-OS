@@ -1,0 +1,3 @@
+.oskit-local-warning{font-size:11px;line-height:1.3;color:#87541a;background:#fff2da;border:1px solid #edcf95;border-radius:8px;padding:8px 10px;align-self:center;font-weight:700}
+@media(max-width:1050px){.oskit-local-warning{max-width:160px}}
+@media(max-width:700px){.oskit-local-warning{display:none}}
