@@ -1,0 +1,44 @@
+/* Independent OS Core views are scoped to oskit- selectors. */
+#oskit-shell .os-section-title{margin:22px 0}
+#oskit-shell .os-section-title h2{font-size:28px;margin:9px 0}
+#oskit-shell .os-section-title p{color:#64748b;font-size:13px;margin:0}
+#oskit-shell .os-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 20px}
+#oskit-shell .os-kpi{padding:18px;border:1px solid #dce5ee;border-radius:12px;background:#fff;display:flex;flex-direction:column;gap:10px}
+#oskit-shell .os-kpi small{color:#64748b;font-size:12px}
+#oskit-shell .os-kpi strong{font-size:25px;color:#164277}
+#oskit-shell .os-entity-grid{display:grid;grid-template-columns:1fr;gap:20px}
+#oskit-shell .os-entity{min-width:0}
+#oskit-shell .os-count{display:inline-block;padding:3px 8px;border-radius:999px;background:#e7f3ff;font-size:12px;color:#265d99;vertical-align:middle}
+#oskit-shell .os-empty{padding:28px 8px;color:#738398;font-size:13px}
+#oskit-shell .os-table{min-width:680px}
+#oskit-shell .os-table td{max-width:250px;overflow-wrap:anywhere}
+#oskit-shell .os-table .os-actions{min-width:210px;white-space:nowrap}
+#oskit-shell .os-actions button{border:1px solid #cbd8e8;background:#f8fbff;border-radius:6px;padding:5px 8px;cursor:pointer;font-size:11px;margin:2px}
+#oskit-shell .os-actions button:hover{background:#ebf4ff}
+#oskit-shell .os-actions button.os-delete{color:#b42336;border-color:#f0c6cd}
+#oskit-shell .os-two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+#oskit-shell .os-description{color:#61748e;line-height:1.65;font-size:13px}
+#oskit-shell .os-label{display:block;font-size:12px;font-weight:700;margin:18px 0}
+#oskit-shell .os-label select{margin:8px 0}
+#oskit-shell .os-button-row{display:flex;gap:9px;flex-wrap:wrap}
+#oskit-shell .os-rule{border:0;border-top:1px solid #e1e8f0;margin:23px 0}
+#oskit-shell .os-security{margin-top:18px;border-left:4px solid #d69d35}
+#oskit-shell .os-security p{font-size:12px;color:#61748e;line-height:1.6}
+#oskit-dialog .os-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+#oskit-dialog .os-form-grid label{display:block;font-size:12px;font-weight:700;margin:8px 0}
+#oskit-dialog .os-form-grid label:nth-last-child(1){grid-column:1/-1}
+#oskit-dialog .os-form-grid input,#oskit-dialog .os-form-grid select,#oskit-dialog .os-form-grid textarea{margin-top:6px}
+.os-global-select{min-width:170px;display:flex;flex-direction:column;gap:3px;font-size:10px;color:#64748b}
+.os-global-select select{padding:7px 9px;max-width:210px;font-size:12px}
+.os-mobile-tabs{display:none}
+.oskit-failure{border:1px solid #eabdbd;background:#fff1f1;color:#a12020;border-radius:8px;padding:15px;margin:10px 0}
+@media(max-width:900px){
+  #oskit-shell .os-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #oskit-shell .os-two{grid-template-columns:1fr}
+}
+@media(max-width:700px){
+  .os-mobile-tabs{display:flex;overflow:auto;gap:6px;padding:12px 0;position:sticky;top:0;background:#f3f7fa;z-index:9}
+  .os-mobile-tabs button{border:1px solid #cad6e4;white-space:nowrap;padding:9px 12px;border-radius:7px;background:white;color:#143f64;font-size:12px;font-weight:750}
+  #oskit-shell .os-kpis{grid-template-columns:1fr 1fr}
+  #oskit-dialog .os-form-grid{grid-template-columns:1fr}
+}

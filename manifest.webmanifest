@@ -1,0 +1,19 @@
+{
+  "id": "/index.html",
+  "name": "Omnidite OS",
+  "short_name": "Omnidite OS",
+  "description": "Independent internal operating system",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0b1f33",
+  "theme_color": "#0b1f33",
+  "icons": [
+    {
+      "src": "/assets/os-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

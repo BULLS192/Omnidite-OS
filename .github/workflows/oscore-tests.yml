@@ -1,0 +1,31 @@
+name: OS Core tests
+on:
+  push:
+    branches:
+      - 'feature/os-core-modular-v0.2'
+  pull_request:
+    paths:
+      - 'oskit/**'
+      - '.github/workflows/oscore-tests.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax checks
+        run: |
+          node --check server.mjs
+          node --check oskit/core.mjs
+          node --check oskit/ui.mjs
+          node --check oskit/boot.mjs
+          node --check oskit/profiles/omnidite.mjs
+          node --check oskit/profiles/ttt-example.mjs
+      - name: Unit and integration checks
+        run: node --test oskit/tests/*.test.mjs
