@@ -7,7 +7,7 @@
   "author": "Omnidite Advisory",
   "scripts": {
     "start:desktop": "electron .",
-    "build:win": "electron-builder --win nsis portable --publish never",
+    "build:win": "electron-builder --win nsis --publish never",
     "test": "node --test oskit/tests/*.test.mjs"
   },
   "devDependencies": {
@@ -37,10 +37,9 @@
     "compression": "normal",
     "win": {
       "target": [
-        "nsis",
-        "portable"
+        "nsis"
       ],
-      "artifactName": "OmniditeOS-${version}-${arch}-${ext}"
+      "artifactName": "OmniditeOS-Setup-${version}-${arch}.${ext}"
     },
     "nsis": {
       "oneClick": false,
